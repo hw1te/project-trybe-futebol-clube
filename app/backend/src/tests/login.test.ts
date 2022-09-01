@@ -18,7 +18,7 @@ describe('Testa o acesso ao endpoint /login.', () => {
 
      const response = await chai.request(app).get('/login')
      
-     expect(response.status).to.equal(201);
+     expect(response.status).to.equal(200);
 
      sinon.restore();
   })
