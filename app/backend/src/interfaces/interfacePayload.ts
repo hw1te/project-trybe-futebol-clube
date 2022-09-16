@@ -1,4 +1,4 @@
-export default interface userPayload {
+export default interface UserPayload {
   id: number;
   username: string;
   role: string;
