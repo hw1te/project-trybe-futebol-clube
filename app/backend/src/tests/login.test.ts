@@ -30,17 +30,23 @@ describe('Testa o acesso ao endpoint /login.', () => {
     sinon.restore();
   })
   it('Testa resposta da rota', async () => {
-     const response = await chai.request(app).get('/login')
+     const response = await chai.request(app).post('/login')
      
      expect(response.status).to.equal(200);
   })
 
   it('Retorna os usuários', async () => {
     const response = await chai.request(app).get('/login')
-
+    
     expect(response.body).to.be.deep.equal(userMock);
   })
+  
+  it('Testa validação de usuario', async ()  => {
+    const response = await chai.request(app).post('/login')
+    .send({ email: 'admin@admin.com', password: 'secret' })
 
+    expect(response.status).to.equal(401)
+  })
   it('Testa validação de senha', async ()  => {
     const response = await chai.request(app).post('/login')
     .send({ email: 'admin@admin.com', password: '' })
@@ -48,17 +54,18 @@ describe('Testa o acesso ao endpoint /login.', () => {
     expect(response.status).to.equal(400)
   })
 
-  it('Testa validação de usuario', async ()  => {
+  it('Testa validação de email', async ()  => {
     const response = await chai.request(app).post('/login')
     .send({ email: '', password: 'secret_admin' })
 
     expect(response.status).to.equal(400)
   })
 
-  it('Testa validação de usuario', async ()  => {
-    const response = await chai.request(app).post('/login')
-    .send({ email: 'admin@admin.com', password: 'secret' })
 
-    expect(response.status).to.equal(401)
+  it('Testa validação de role', async ()  => {
+    const response = await chai.request(app).get('/login/validate')
+    .send({ role: '' })
+  
+    expect(response).to.equal(response)
   })
 });
