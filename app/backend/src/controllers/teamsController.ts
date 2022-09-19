@@ -5,9 +5,9 @@ export default class teamsController {
   constructor(public teamsService = new TeamsService()) {}
 
   async getAll(req: Request, res: Response) {
-    const { code, data } = await this.teamsService.getAll();
+    const response = await this.teamsService.getAll();
 
-    return res.status(code).json(data);
+    return res.status(200).json(response);
   }
 
   async getById(req: Request, res: Response) {

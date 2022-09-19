@@ -7,10 +7,10 @@ export interface TeamsInterface {
 }
 
 export default class TeamService {
-  public getAll = async () => {
+  public getAll = async (): Promise<TeamsInterface[]> => {
     const teams = await Teams.findAll();
 
-    return { code: 200, data: teams };
+    return teams;
   };
 
   public getById = async (id: number): Promise<TeamsInterface> => {
