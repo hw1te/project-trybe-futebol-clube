@@ -27,4 +27,11 @@ export default class matchesService {
 
     return result;
   };
+
+  public end = async (id: number): Promise<void> => {
+    await Matches.update(
+      { inProgress: false },
+      { where: { id } },
+    );
+  };
 }

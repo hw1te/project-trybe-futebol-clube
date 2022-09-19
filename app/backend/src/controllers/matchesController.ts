@@ -16,6 +16,14 @@ export default class matchesController {
     return res.status(201).json(response);
   }
 
+  async end(req: Request, res: Response) {
+    const { id } = req.params;
+
+    await this.matchesService.end(Number(id));
+
+    res.status(200).json({ message: 'Finished' });
+  }
+
   // async getById(req: Request, res: Response) {
   //   const { id } = req.params;
   //   const response = await this.teamsService.getById(Number(id));
