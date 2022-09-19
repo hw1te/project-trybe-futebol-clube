@@ -8,5 +8,6 @@ const matchesController = new MatchesController();
 // const authorization = new Authorization();
 
 router.get('/', (req, res) => matchesController.getAll(req, res));
+router.post('/', (req, res) => matchesController.create(req, res));
 
 export default router;

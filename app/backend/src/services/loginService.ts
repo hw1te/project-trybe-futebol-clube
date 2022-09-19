@@ -5,7 +5,6 @@ import userPayload from '../interfaces/interfacePayload';
 
 export default class LoginService {
   public login = async (payload: userPayload) => {
-    console.log(payload);
     if (!payload.email || !payload.password) {
       return { code: 400, data: { message: 'All fields must be filled' } };
     }
@@ -35,7 +34,6 @@ export default class LoginService {
     if (!user) {
       return { code: 401, data: { message: 'Incorrect email or password' } };
     }
-    console.log(user.role);
     return { code: 200, data: { role: user.role as string } };
   };
 }

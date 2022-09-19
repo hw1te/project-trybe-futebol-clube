@@ -1,6 +1,13 @@
 import Matches from '../database/models/matches';
 import Teams from '../database/models/teams';
 
+export interface MatchesInterface {
+  homeTeam: number
+  awayTeam: number
+  homeTeamGoals: number
+  awayTeamGoals: number
+}
+
 export default class matchesService {
   public getAll = async (): Promise<Matches[]> => {
     const matches = await Matches.findAll({
@@ -11,5 +18,13 @@ export default class matchesService {
     });
 
     return matches;
+  };
+
+  public create = async (matches: MatchesInterface): Promise<Matches> => {
+    const result = await Matches.create({
+      ...matches, inProgress: true,
+    });
+
+    return result;
   };
 }
