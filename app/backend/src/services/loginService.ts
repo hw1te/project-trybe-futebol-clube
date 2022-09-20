@@ -15,7 +15,7 @@ export default class LoginService {
       return { code: 401, data: { message: 'Incorrect email or password' } };
     }
     const validPassword = bcrypt.compareSync(payload.password, user.password);
-    const token = jwt.sign(
+    const token: string = jwt.sign(
       { email: user.email, id: user.id, role: user.role },
       process.env.JWT_SECRET as string,
     );

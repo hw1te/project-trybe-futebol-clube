@@ -17,7 +17,7 @@ export default class TokenMiddleware {
 
       return next();
     } catch (error) {
-      return res.status(401).json({ message: 'Expired or invalid token' });
+      return res.status(401).json({ message: 'Token must be a valid token' });
     }
   };
 }

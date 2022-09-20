@@ -11,9 +11,9 @@ export default class matchesController {
   }
 
   async create(req: Request, res: Response) {
-    const response = await this.matchesService.create(req.body);
+    const { code, data } = await this.matchesService.create(req.body);
 
-    return res.status(201).json(response);
+    return res.status(code).json(data);
   }
 
   async end(req: Request, res: Response) {
@@ -24,10 +24,10 @@ export default class matchesController {
     res.status(200).json({ message: 'Finished' });
   }
 
-  // async getById(req: Request, res: Response) {
-  //   const { id } = req.params;
-  //   const response = await this.teamsService.getById(Number(id));
+  async update(req: Request, res: Response) {
+    const { id } = req.params;
+    await this.matchesService.update(Number(id), req.body);
 
-  //   return res.status(200).json(response);
-  // }
+    return res.json({ message: 'Update done' });
+  }
 }
