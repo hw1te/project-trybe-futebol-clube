@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import Teams from '../database/models/teams';
 import Matches from '../database/models/matches';
 import MatchesGoals from '../interfaces/interfaceMatchesGoals';
@@ -20,17 +21,23 @@ const matchResults = (matches: Matches[]) => matches.map((match) => {
   };
 });
 
-const sumGoals = (matches: MatchesGoals[]) => {
-  let goalsFavor = 0;
-  let goalsOwn = 0;
-  matches.forEach((match) => {
-    goalsFavor += match.homeTeamGoals;
-    goalsOwn += match.awayTeamGoals;
-  });
+const awayTeamResults = (matches: Matches[]): MatchesGoals[] => matches.map((match) => {
+  let result;
+  if (match.homeTeamGoals < match.awayTeamGoals) {
+    result = 'victory';
+  } else if (match.homeTeamGoals <= match.awayTeamGoals) {
+    result = 'draw';
+  } else {
+    result = 'loser';
+  }
+  return {
+    homeTeamGoals: match.homeTeamGoals,
+    awayTeamGoals: match.awayTeamGoals,
+    result,
+  };
+});
 
-  return { goalsFavor, goalsOwn };
-};
-const totalResult = (matches: MatchesGoals[]) => {
+const matchFinalResult = (matches: MatchesGoals[]) => {
   let [totalVictories, totalDraws, totalLosses] = [0, 0, 0];
   matches.forEach((match) => {
     if (match.result === 'victory') {
@@ -46,8 +53,62 @@ const totalResult = (matches: MatchesGoals[]) => {
   return { totalVictories, totalDraws, totalLosses };
 };
 
-const sumMatches = (matches: MatchesGoals[]) => {
-  const resultMatchesByTeam = totalResult(matches);
+const allTeamMatchResults = (matches: Matches[], id: number): MatchesGoals[] => {
+  const homeMatches = matches.filter((match) => (
+    match.homeTeam === id
+  ));
+  const awayMatches = matches.filter((match) => (
+    match.awayTeam === id
+  ));
+  const homeMatchesResult = matchFinalResult(homeMatches);
+  const awayMatchesResult = awayTeamResults(awayMatches);
+  return { ...awayMatchesResult, ...homeMatchesResult };
+};
+
+const goalsSum = (matches: MatchesGoals[]) => {
+  let goalsFavor = 0;
+  let goalsOwn = 0;
+  matches.forEach((match) => {
+    goalsFavor += match.homeTeamGoals;
+    goalsOwn += match.awayTeamGoals;
+  });
+
+  return { goalsFavor, goalsOwn };
+};
+
+const awayGoalsSum = (matches: MatchesGoals[]) => {
+  let goalsFavor = 0;
+  let goalsOwn = 0;
+  matches.forEach((match) => {
+    goalsFavor += match.awayTeamGoals;
+    goalsOwn += match.homeTeamGoals;
+  });
+  return { goalsFavor, goalsOwn };
+};
+
+const totalGoalsSum = (matches: MatchesGoals[]) => {
+  let goalsFavor = 0;
+  let goalsOwn = 0;
+  matches.forEach((match) => {
+    const goals = [match.awayTeamGoals, match.homeTeamGoals];
+    const higherScore = Math.max(...goals);
+    const lowerScore = Math.min(...goals);
+    if (match.result === 'draw') {
+      goalsFavor += match.homeTeamGoals;
+    } else if (match.result === 'victory') {
+      goalsFavor += higherScore;
+      goalsOwn += lowerScore;
+      goalsOwn += match.homeTeamGoals;
+    } else if (match.result === 'loser') {
+      goalsFavor += lowerScore;
+      goalsOwn += higherScore;
+    }
+  });
+  return { goalsFavor, goalsOwn };
+};
+
+const matchesSum = (matches: MatchesGoals[]) => {
+  const resultMatchesByTeam = matchFinalResult(matches);
   const totalPoints = resultMatchesByTeam.totalVictories * 3 + resultMatchesByTeam.totalDraws;
   const totalGames = matches.length;
   const efficiency = ((totalPoints / (totalGames * 3)) * 100).toFixed(2);
@@ -78,13 +139,55 @@ export default class leaderboardService {
       teams.map(async (team) => {
         const matches = await Matches.findAll({ where: { homeTeam: team.id, inProgress: 0 } });
         const resultMatches = matchResults(matches);
-        const sumResult = sumMatches(resultMatches);
-        const sumGoalsTeam = sumGoals(resultMatches);
+        const sumResult = matchesSum(resultMatches);
+        const goalsSumTeam = goalsSum(resultMatches);
+
         return {
           name: team.teamName,
           ...sumResult,
-          ...sumGoalsTeam,
-          goalsBalance: sumGoalsTeam.goalsFavor - sumGoalsTeam.goalsOwn,
+          ...goalsSumTeam,
+          goalsBalance: goalsSumTeam.goalsFavor - goalsSumTeam.goalsOwn,
+        };
+      }),
+    );
+    return { code: 200, data: sortTeamsOrder(finalTeamsResults) };
+  };
+
+  public getAllAway = async () => {
+    const teams = await Teams.findAll();
+    const finalTeamsResults = await Promise.all(
+      teams.map(async (team) => {
+        const matches = await Matches.findAll({ where: { awayTeam: team.id, inProgress: 0 } });
+        const resultMatches = awayTeamResults(matches);
+        const resultSum = matchesSum(resultMatches);
+        const teamGoalsSum = awayGoalsSum(resultMatches);
+        return {
+          name: team.teamName,
+          ...resultSum,
+          ...teamGoalsSum,
+          goalsBalance: teamGoalsSum.goalsFavor - teamGoalsSum.goalsOwn,
+        };
+      }),
+    );
+    return { code: 200, data: sortTeamsOrder(finalTeamsResults) };
+  };
+
+  public getAny = async () => {
+    const teams = await Teams.findAll();
+    const finalTeamsResults = await Promise.all(
+      teams.map(async (team) => {
+        const matches = await Matches.findAll(
+          // https://stackoverflow.com/questions/68122497/sequelize-op-or-within-op-and-for-nested-operations
+          { where: { [Op.or]: [{ awayTeam: team.id }, { homeTeam: team.id }], inProgress: 0 } },
+        );
+        const resultMatches = allTeamMatchResults(matches, team.id);
+        const sumResult = matchesSum(resultMatches);
+        const goalsSumTeam = totalGoalsSum(resultMatches);
+        return {
+          name: team.teamName,
+          ...sumResult,
+          ...goalsSumTeam,
+          goalsBalance: goalsSumTeam.goalsFavor - goalsSumTeam.goalsOwn,
         };
       }),
     );

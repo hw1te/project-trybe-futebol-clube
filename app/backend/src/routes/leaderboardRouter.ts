@@ -8,5 +8,6 @@ const leaderboardController = new LeaderboardController();
 // const authorization = new Authorization();
 
 router.get('/home', (req, res) => leaderboardController.getAll(req, res));
+router.get('/away', (req, res) => leaderboardController.getAllAway(req, res));
 
 export default router;
