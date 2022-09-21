@@ -14,7 +14,7 @@ chai.use(chaiHttp);
 const { expect } = chai;
 
 
-  const teamsMock: TeamsInterface[]= [
+  export const teamsMock: TeamsInterface[]= [
     {
     id: 1,
     teamName: 'Avaí/Kindermann'

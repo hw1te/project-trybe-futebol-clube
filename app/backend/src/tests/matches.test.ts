@@ -32,7 +32,7 @@ interface MockInterface {
 
 
 
-const matchesMock: MockInterface[] = [
+  export const matchesMock: MockInterface[] = [
   {
     id: 1,
     homeTeam: 16,
