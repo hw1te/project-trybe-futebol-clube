@@ -15,4 +15,10 @@ export default class LeaderboardController {
 
     return res.status(code).json(data);
   }
+
+  async getAny(_req: Request, res: Response) {
+    const { code, data } = await this.leaderboardService.getAny();
+
+    return res.status(code).json(data);
+  }
 }

@@ -43,7 +43,7 @@ describe('Testa o end point /teams e suas respectivas particularidades', () => {
     expect(response.status).to.equal(200);
  })
  it('Retorna os usuários', async () => {
-  const response = await chai.request(app).get('/teams')
+  const response = await chai.request(app).post('/teams')
 
   expect(response.body).to.be.deep.equal(teamsMock);
 })

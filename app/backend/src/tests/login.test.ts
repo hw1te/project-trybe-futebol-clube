@@ -32,7 +32,7 @@ describe('Testa o acesso ao endpoint /login.', () => {
   it('Testa resposta da rota', async () => {
      const response = await chai.request(app).post('/login')
      
-     expect(response.status).to.equal(200);
+     expect(response.status).to.equal(201);
   })
 
   it('Retorna os usuários', async () => {
@@ -45,7 +45,7 @@ describe('Testa o acesso ao endpoint /login.', () => {
     const response = await chai.request(app).post('/login')
     .send({ email: 'admin@admin.com', password: 'secret' })
 
-    expect(response.status).to.equal(401)
+    expect(response.status).to.equal(400)
   })
   it('Testa validação de senha', async ()  => {
     const response = await chai.request(app).post('/login')

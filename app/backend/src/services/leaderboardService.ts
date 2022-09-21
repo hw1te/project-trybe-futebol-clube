@@ -37,34 +37,6 @@ const awayTeamResults = (matches: Matches[]): MatchesGoals[] => matches.map((mat
   };
 });
 
-const matchFinalResult = (matches: MatchesGoals[]) => {
-  let [totalVictories, totalDraws, totalLosses] = [0, 0, 0];
-  matches.forEach((match) => {
-    if (match.result === 'victory') {
-      totalVictories += 1;
-    } else if (match.result === 'draw') {
-      totalDraws += 1;
-    } else if (match.result === 'loser') {
-      totalLosses += 1;
-    }
-
-    return null;
-  });
-  return { totalVictories, totalDraws, totalLosses };
-};
-
-const allTeamMatchResults = (matches: Matches[], id: number): MatchesGoals[] => {
-  const homeMatches = matches.filter((match) => (
-    match.homeTeam === id
-  ));
-  const awayMatches = matches.filter((match) => (
-    match.awayTeam === id
-  ));
-  const homeMatchesResult = matchFinalResult(homeMatches);
-  const awayMatchesResult = awayTeamResults(awayMatches);
-  return { ...awayMatchesResult, ...homeMatchesResult };
-};
-
 const goalsSum = (matches: MatchesGoals[]) => {
   let goalsFavor = 0;
   let goalsOwn = 0;
@@ -105,6 +77,32 @@ const totalGoalsSum = (matches: MatchesGoals[]) => {
     }
   });
   return { goalsFavor, goalsOwn };
+};
+
+const matchFinalResult = (matches: MatchesGoals[]) => {
+  let [totalVictories, totalDraws, totalLosses] = [0, 0, 0];
+  Object.values(matches).forEach((match) => {
+    if (match.result === 'victory') {
+      totalVictories += 1;
+    } else if (match.result === 'draw') {
+      totalDraws += 1;
+    } else if (match.result === 'loser') {
+      totalLosses += 1;
+    }
+  });
+  return { totalVictories, totalDraws, totalLosses };
+};
+
+const allTeamMatchResults = (matches: Matches[], id: number): MatchesGoals[] => {
+  const homeMatches = matches.filter((match) => (
+    match.homeTeam === id
+  ));
+  const awayMatches = matches.filter((match) => (
+    match.awayTeam === id
+  ));
+  const homeMatchesResult = matchFinalResult(homeMatches);
+  const awayMatchesResult = awayTeamResults(awayMatches);
+  return { ...awayMatchesResult, ...homeMatchesResult };
 };
 
 const matchesSum = (matches: MatchesGoals[]) => {

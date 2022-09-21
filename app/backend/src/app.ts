@@ -14,8 +14,8 @@ class App {
     this.app.use(express.json());
     this.app.use('/login', loginRouter);
     this.app.use('/teams', teamRouter);
-    this.app.use('/matches', matchesRouter);
     this.app.use('/leaderboard', leaderboardRouter);
+    this.app.use('/matches', matchesRouter);
     // Não remover essa rota
     this.app.get('/', (req, res) => res.json({ ok: true }));
   }
