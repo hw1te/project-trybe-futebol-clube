@@ -128,7 +128,7 @@ const sortTeamsOrder = (resultTeam: TeamsResult[]) => resultTeam.sort((team, oth
   return 0;
 });
 
-export default class leaderboardService {
+export default class LeaderboardService {
   public getAll = async () => {
     const teams = await Teams.findAll();
     const finalTeamsResults = await Promise.all(

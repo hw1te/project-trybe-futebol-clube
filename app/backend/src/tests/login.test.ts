@@ -7,13 +7,11 @@ import { app } from '../app';
 import User from '../database/models/users';
 import userPayload from '../interfaces/interfacePayload';
 
-import { Response } from 'superagent';
-
 chai.use(chaiHttp);
 
 const { expect } = chai;
 
-const userMock: userPayload = {
+export const userMock: userPayload = {
   id: 1,
   username: 'Admin',
   role: 'admin',
@@ -31,14 +29,22 @@ describe('Testa o acesso ao endpoint /login.', () => {
   })
   it('Testa resposta da rota', async () => {
      const response = await chai.request(app).post('/login')
+     .send({
+      "email": "admin@admin.com",
+      "password": "secret_admin"
+    })
      
-     expect(response.status).to.equal(201);
+     expect(response.status).to.equal(200);
   })
 
   it('Retorna os usuários', async () => {
-    const response = await chai.request(app).get('/login')
+    const response = await chai.request(app).post('/login')
+    .send({
+      "email": "admin@admin.com",
+      "password": "secret_admin"
+    })
     
-    expect(response.body).to.be.deep.equal(userMock);
+    expect(response.body).to.have.property('token');
   })
   
   it('Testa validação de usuario', async ()  => {
@@ -69,3 +75,22 @@ describe('Testa o acesso ao endpoint /login.', () => {
     expect(response).to.equal(response)
   })
 });
+
+describe('Testa o getRole na rota login/validate', () => {
+  beforeEach(() => {
+    sinon.stub(User, "findOne").resolves(userMock as User);
+  })
+  afterEach(() => {
+    sinon.restore()
+  })
+
+  it('Testa se o email e password estão corretos', async () => {
+    const token = await chai.request(app).post('/login').send({
+      "email": "admin@admin.com",
+      "password": "secret_admin"
+    }).then((resp) => resp.body.token)
+    const response = await chai.request(app).get('/login/validate').set({Authorization: token})
+
+    expect(response.body).to.have.property('role')
+  })
+})
