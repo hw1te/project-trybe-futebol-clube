@@ -1,4 +1,4 @@
 export default interface MatchesTeamsInterface {
-  homeTeam: number
-  awayTeam: number
+  homeTeam?: number
+  awayTeam?: number
 }
